@@ -1,0 +1,56 @@
+---
+- name: Create tftpboot directory
+  file:
+    path: "{{ tftpboot_dir }}"
+    state: directory
+    mode: '0755'
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq interface settings
+  template:
+    src: etc/dnsmasq.d/00-interface.conf.j2
+    dest: /etc/dnsmasq.d/00-interface.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq dns settings
+  template:
+    src: etc/dnsmasq.d/01-dns.conf.j2
+    dest: /etc/dnsmasq.d/01-dns.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq DHCP settings
+  template:
+    src: etc/dnsmasq.d/10-dhcp.conf.j2
+    dest: /etc/dnsmasq.d/10-dhcp.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq TFTP settings
+  template:
+    src: etc/dnsmasq.d/20-tftp.conf.j2
+    dest: /etc/dnsmasq.d/20-tftp.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq PXE boot settings for BIOS
+  template:
+    src: etc/dnsmasq.d/30-pxeboot-bios.conf.j2
+    dest: /etc/dnsmasq.d/30-pxeboot-bios.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf
+
+- name: Configure dnsmasq PXE boot settings for EFI
+  template:
+    src: etc/dnsmasq.d/31-pxeboot-efi.conf.j2
+    dest: /etc/dnsmasq.d/31-pxeboot-efi.conf
+  notify: Restart dnsmasq
+  tags:
+    - dnsmasq_conf

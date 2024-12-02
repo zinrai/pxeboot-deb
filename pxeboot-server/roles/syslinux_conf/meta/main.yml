@@ -1,0 +1,4 @@
+---
+dependencies:
+  - role: syslinux
+  - role: grub-efi-amd64-signed

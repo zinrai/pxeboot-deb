@@ -1,0 +1,7 @@
+---
+- name: Install syslinux
+  apt:
+    name: syslinux
+    state: present
+  tags:
+    - syslinux

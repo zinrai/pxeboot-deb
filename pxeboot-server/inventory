@@ -1,0 +1,2 @@
+[pxeboot_server]
+pxeboot-server ansible_host=192.168.122.60

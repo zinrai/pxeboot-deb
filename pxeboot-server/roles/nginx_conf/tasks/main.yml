@@ -1,0 +1,24 @@
+---
+- name: Create iso directory
+  file:
+    path: "{{ iso_dir }}"
+    state: directory
+    mode: '0755'
+  tags:
+    - nginx_conf
+
+- name: Configure nginx for PXE
+  template:
+    src: etc/nginx/sites-available/pxe.conf.j2
+    dest: /etc/nginx/sites-available/pxe.conf
+  tags:
+    - nginx_conf
+
+- name: Enable PXE nginx configuration
+  file:
+    src: /etc/nginx/sites-available/pxe.conf
+    dest: /etc/nginx/sites-enabled/pxe.conf
+    state: link
+  notify: Restart nginx
+  tags:
+    - nginx_conf

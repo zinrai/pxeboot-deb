@@ -1,0 +1,34 @@
+---
+- name: Create symlink for ldlinux.c32
+  file:
+    src: "/usr/lib/syslinux/modules/bios/ldlinux.c32"
+    dest: "{{ tftpboot_dir }}/ldlinux.c32"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create symlink for grubnetx64.efi in TFTP directory
+  file:
+    src: /usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed
+    dest: "{{ tftpboot_dir }}/grubnetx64.efi"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create GRUB directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ tftpboot_dir }}/grub"
+    - "{{ tftpboot_dir }}/grub/system"
+  tags:
+    - syslinux_conf
+
+- name: Configure GRUB
+  template:
+    src: grub.cfg.j2
+    dest: "{{ tftpboot_dir }}/grub/grub.cfg"
+  tags:
+    - syslinux_conf

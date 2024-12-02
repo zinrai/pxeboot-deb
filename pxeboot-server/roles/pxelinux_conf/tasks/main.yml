@@ -1,0 +1,15 @@
+- name: Create symlink for pxelinux.0
+  file:
+    src: "/usr/lib/PXELINUX/pxelinux.0"
+    dest: "{{ tftpboot_dir }}/pxelinux.0"
+    state: link
+  tags:
+    - pxelinux_conf
+
+- name: Create pxelinux.cfg directory
+  file:
+    path: "{{ tftpboot_dir }}/pxelinux.cfg"
+    state: directory
+    mode: '0755'
+  tags:
+    - pxelinux_conf

@@ -1,0 +1,7 @@
+---
+- name: Install pxelinux
+  apt:
+    name: pxelinux
+    state: present
+  tags:
+    - pxelinux
