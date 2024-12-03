@@ -1,4 +1,5 @@
 ---
 dependencies:
   - role: syslinux
+  - role: pxelinux
   - role: grub-efi-amd64-signed

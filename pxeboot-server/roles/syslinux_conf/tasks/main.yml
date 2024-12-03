@@ -1,34 +1,53 @@
 ---
-- name: Create symlink for ldlinux.c32
+- name: Create bios and efi directory
   file:
-    src: "/usr/lib/syslinux/modules/bios/ldlinux.c32"
-    dest: "{{ tftpboot_dir }}/ldlinux.c32"
-    state: link
-  tags:
-    - syslinux_conf
-
-- name: Create symlink for grubnetx64.efi in TFTP directory
-  file:
-    src: /usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed
-    dest: "{{ tftpboot_dir }}/grubnetx64.efi"
-    state: link
-  tags:
-    - syslinux_conf
-
-- name: Create GRUB directories
-  file:
-    path: "{{ item }}"
+    path: "{{ tftpboot_dir }}/{{ item }}"
     state: directory
+    recurse: true
     mode: '0755'
   loop:
-    - "{{ tftpboot_dir }}/grub"
-    - "{{ tftpboot_dir }}/grub/system"
+    - "bios/pxelinux.cfg"
+    - "efi64"
+    - "grub/system"
   tags:
     - syslinux_conf
 
-- name: Configure GRUB
-  template:
-    src: grub.cfg.j2
-    dest: "{{ tftpboot_dir }}/grub/grub.cfg"
+- name: Create symlink for bios/pxelinux.0
+  file:
+    src: "/usr/lib/PXELINUX/pxelinux.0"
+    dest: "{{ tftpboot_dir }}/bios/pxelinux.0"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create symlink for bios/ldlinux.c32
+  file:
+    src: "/usr/lib/syslinux/modules/bios/ldlinux.c32"
+    dest: "{{ tftpboot_dir }}/bios/ldlinux.c32"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create symlink for bios/menu.c32
+  file:
+    src: "/usr/lib/syslinux/modules/bios/menu.c32"
+    dest: "{{ tftpboot_dir }}/bios/menu.c32"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create symlink for bios/libutil.c32
+  file:
+    src: "/usr/lib/syslinux/modules/bios/libutil.c32"
+    dest: "{{ tftpboot_dir }}/bios/libutil.c32"
+    state: link
+  tags:
+    - syslinux_conf
+
+- name: Create symlink for efi64/grubnetx64.efi in TFTP directory
+  file:
+    src: /usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed
+    dest: "{{ tftpboot_dir }}/efi64/grubnetx64.efi"
+    state: link
   tags:
     - syslinux_conf

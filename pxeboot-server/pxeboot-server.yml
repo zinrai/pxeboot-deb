@@ -1,7 +1,6 @@
 ---
 - hosts: pxeboot_server
   roles:
-    - dnsmasq_conf
     - nginx_conf
     - syslinux_conf
-    - pxelinux_conf
+    - dnsmasq_conf
