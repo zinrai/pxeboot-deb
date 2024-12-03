@@ -1,0 +1,10 @@
+tftpboot_dir: "/var/www/tftpboot"
+iso_dir: "/var/www/iso"
+targets:
+  - name: "debian"
+    codename: "bookworm"
+    version: "12.8.0"
+    iso_file: "https://ftp.jaist.ac.jp/pub/Linux/debian-cd/12.8.0/amd64/iso-cd/debian-12.8.0-amd64-netinst.iso"
+    boot_files:
+      vmlinuz: "install.amd/vmlinuz"
+      initrd: "install.amd/initrd.gz"
