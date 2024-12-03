@@ -1,0 +1,7 @@
+default linux
+prompt 0
+timeout 30
+label linux
+kernel /images/{{.Linux}}/{{.Codename}}/{{.Version}}/vmlinuz
+ipappend 2
+append initrd=/images/{{.Linux}}/{{.Codename}}/{{.Version}}/initrd autoinstall ip=dhcp

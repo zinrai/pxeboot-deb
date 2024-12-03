@@ -1,0 +1,5 @@
+menuentry "AutoInstall {{.Linux}} {{.Codename}}" {
+    set gfxpayload=keep
+    linux /images/{{.Linux}}/{{.Codename}}/{{.Version}}/vmlinuz autoinstall ip=dhcp
+    initrd /images/{{.Linux}}/{{.Codename}}/{{.Version}}/initrd
+}
