@@ -9,16 +9,24 @@
 
 - name: Configure nginx for PXE
   template:
-    src: etc/nginx/sites-available/pxe.conf.j2
-    dest: /etc/nginx/sites-available/pxe.conf
+    src: etc/nginx/sites-available/pxe.j2
+    dest: /etc/nginx/sites-available/pxe
   tags:
     - nginx_conf
 
 - name: Enable PXE nginx configuration
   file:
-    src: /etc/nginx/sites-available/pxe.conf
-    dest: /etc/nginx/sites-enabled/pxe.conf
+    src: /etc/nginx/sites-available/pxe
+    dest: /etc/nginx/sites-enabled/pxe
     state: link
+  notify: Restart nginx
+  tags:
+    - nginx_conf
+
+- name: Disable default nginx configuration
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
   notify: Restart nginx
   tags:
     - nginx_conf
