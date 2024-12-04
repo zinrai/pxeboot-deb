@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"gopkg.in/yaml.v3"
@@ -40,7 +41,8 @@ type MenuData struct {
 }
 
 var templateFuncs = template.FuncMap{
-	"base": filepath.Base,
+	"base":  filepath.Base,
+	"title": strings.Title,
 }
 
 func main() {
@@ -92,9 +94,9 @@ func setupBootFiles(config *Config) error {
 		}
 	}
 
-	// Generate PXE menus after processing all targets
-	if err := generatePXEMenus(config); err != nil {
-		return fmt.Errorf("failed to generate PXE menus: %v", err)
+	// Generate boot menus after processing all targets
+	if err := generateBootMenus(config); err != nil {
+		return fmt.Errorf("failed to generate boot menus: %v", err)
 	}
 
 	return nil
@@ -229,7 +231,21 @@ func mountAndCopyFiles(isoPath, tftpPath, mountPoint string, bootFiles BootFiles
 	return nil
 }
 
-func generatePXEMenus(config *Config) error {
+func generateBootMenus(config *Config) error {
+	// PXELinux menu generation
+	if err := generatePXELinuxMenu(config); err != nil {
+		return fmt.Errorf("failed to generate PXELinux menu: %v", err)
+	}
+
+	// iPXE menu generation
+	if err := generateIPXEMenu(config); err != nil {
+		return fmt.Errorf("failed to generate iPXE menu: %v", err)
+	}
+
+	return nil
+}
+
+func generatePXELinuxMenu(config *Config) error {
 	biosPath := filepath.Join(config.TFTPBootDir, "bios")
 	pxelinuxCfgPath := filepath.Join(biosPath, "pxelinux.cfg")
 
@@ -252,7 +268,7 @@ func generatePXEMenus(config *Config) error {
 
 	// Build absolute paths of template files
 	tplPath := filepath.Join(execDir, "templates", "pxe_menu.tpl")
-	log.Printf("Loading template from: %s", tplPath)
+	log.Printf("Loading PXELinux template from: %s", tplPath)
 
 	tplContent, err := os.ReadFile(tplPath)
 	if err != nil {
@@ -280,7 +296,51 @@ func generatePXEMenus(config *Config) error {
 		return fmt.Errorf("failed to execute template: %v", err)
 	}
 
-	log.Printf("Generated PXE menu at: %s", defaultFile)
+	log.Printf("Generated PXELinux menu at: %s", defaultFile)
+	return nil
+}
+
+func generateIPXEMenu(config *Config) error {
+	execDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %v", err)
+	}
+
+	ipxePath := filepath.Join(config.TFTPBootDir, "ipxe")
+	if err := os.MkdirAll(ipxePath, 0755); err != nil {
+		return fmt.Errorf("failed to create ipxe directory: %v", err)
+	}
+
+	tplPath := filepath.Join(execDir, "templates", "ipxe_menu.tpl")
+	log.Printf("Loading iPXE template from: %s", tplPath)
+
+	tplContent, err := os.ReadFile(tplPath)
+	if err != nil {
+		return fmt.Errorf("failed to read iPXE template file: %v", err)
+	}
+
+	tpl, err := template.New("ipxe_menu").Funcs(templateFuncs).Parse(string(tplContent))
+	if err != nil {
+		return fmt.Errorf("failed to parse iPXE template: %v", err)
+	}
+
+	data := MenuData{
+		PXEServerHost: config.PXEServerHost,
+		Targets:       config.Targets,
+	}
+
+	bootIpxe := filepath.Join(ipxePath, "boot.ipxe")
+	f, err := os.Create(bootIpxe)
+	if err != nil {
+		return fmt.Errorf("failed to create boot.ipxe: %v", err)
+	}
+	defer f.Close()
+
+	if err := tpl.Execute(f, data); err != nil {
+		return fmt.Errorf("failed to execute iPXE template: %v", err)
+	}
+
+	log.Printf("Generated iPXE menu at: %s", bootIpxe)
 	return nil
 }
 
