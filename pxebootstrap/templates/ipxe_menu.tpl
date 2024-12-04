@@ -3,7 +3,7 @@
 menu PXE Boot Menu
 item --gap -- --------------------------------
 {{- range .Targets }}
-item {{ .Name }}_{{ .Codename }} Install {{ .Name | title }} {{ .Version }}
+item {{ .Name }}_{{ .Codename }} Install {{ .Name | title }} {{ .Codename }} ( {{ .Version }} )
 {{- end }}
 item shell iPXE Shell
 item exit  Exit to BIOS
