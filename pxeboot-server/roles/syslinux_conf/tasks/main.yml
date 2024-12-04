@@ -44,6 +44,14 @@
   tags:
     - syslinux_conf
 
+- name: Create symlink for bios/memdisk
+  file:
+    src: "/usr/lib/syslinux/memdisk"
+    dest: "{{ tftpboot_dir }}/bios/memdisk"
+    state: link
+  tags:
+    - syslinux_conf
+
 - name: Create symlink for efi64/grubnetx64.efi in TFTP directory
   file:
     src: /usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed

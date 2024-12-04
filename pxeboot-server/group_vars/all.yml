@@ -6,9 +6,6 @@ netmask: "255.255.255.0"
 dns_server: "192.168.10.1"
 dhcp_range: "192.168.10.100,192.168.10.200,12h"
 
-# PXE Server
-pxe_server_ip: "192.168.10.1"
-
 # TFTP directory
 tftpboot_dir: "/var/www/tftpboot"
 
