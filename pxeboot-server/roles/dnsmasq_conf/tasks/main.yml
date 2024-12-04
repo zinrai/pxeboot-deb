@@ -1,12 +1,4 @@
 ---
-- name: Create tftpboot directory
-  file:
-    path: "{{ tftpboot_dir }}"
-    state: directory
-    mode: '0755'
-  tags:
-    - dnsmasq_conf
-
 - name: Configure dnsmasq interface settings
   template:
     src: etc/dnsmasq.d/00-interface.conf.j2
