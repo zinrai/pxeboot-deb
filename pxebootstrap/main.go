@@ -39,7 +39,9 @@ var templateFuncs = template.FuncMap{
 
 func main() {
 	var configPath string
+	var updateISO bool
 	flag.StringVar(&configPath, "config", "config.yaml", "Path to configuration file")
+	flag.BoolVar(&updateISO, "update-iso", false, "Update ISO files even if they exist")
 	flag.Parse()
 
 	log.Printf("Reading configuration from: %s\n", configPath)
@@ -52,7 +54,7 @@ func main() {
 	log.Printf("Configuration loaded successfully")
 	log.Printf("Found %d targets to process", len(config.Targets))
 
-	if err := setupBootFiles(config); err != nil {
+	if err := setupBootFiles(config, updateISO); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -76,12 +78,12 @@ func loadConfig(path string) (*Config, error) {
 	return &config, nil
 }
 
-func setupBootFiles(config *Config) error {
+func setupBootFiles(config *Config, updateISO bool) error {
 	for i, target := range config.Targets {
 		log.Printf("Processing target %d/%d: %s %s",
 			i+1, len(config.Targets), target.Name, target.Codename)
 
-		if err := processTarget(config, target); err != nil {
+		if err := processTarget(config, target, updateISO); err != nil {
 			return fmt.Errorf("failed to process target %s: %v", target.Name, err)
 		}
 	}
@@ -94,7 +96,7 @@ func setupBootFiles(config *Config) error {
 	return nil
 }
 
-func processTarget(config *Config, target Target) error {
+func processTarget(config *Config, target Target, updateISO bool) error {
 	// Create directory paths
 	isoPath := filepath.Join(config.ISODir, "images", target.Name, target.Codename)
 
@@ -106,7 +108,7 @@ func processTarget(config *Config, target Target) error {
 
 	// Download ISO
 	isoFilePath := filepath.Join(isoPath, filepath.Base(target.ISOFile))
-	if err := downloadISO(target.ISOFile, isoFilePath); err != nil {
+	if err := downloadISO(target.ISOFile, isoFilePath, updateISO); err != nil {
 		return err
 	}
 
@@ -114,10 +116,14 @@ func processTarget(config *Config, target Target) error {
 	return nil
 }
 
-func downloadISO(url, destPath string) error {
-	if _, err := os.Stat(destPath); err == nil {
-		log.Printf("ISO file already exists at %s", destPath)
-		return nil
+func downloadISO(url, destPath string, updateISO bool) error {
+	if !updateISO {
+		if _, err := os.Stat(destPath); err == nil {
+			log.Printf("ISO file already exists at %s (use --update-iso to update)", destPath)
+			return nil
+		}
+	} else {
+		log.Printf("ISO update enabled, downloading ISO...")
 	}
 
 	log.Printf("Downloading ISO from %s", url)

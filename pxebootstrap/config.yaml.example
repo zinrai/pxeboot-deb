@@ -5,3 +5,6 @@ targets:
   - name: "debian"
     codename: "bookworm"
     iso_file: "https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/current/images/netboot/mini.iso"
+  - name: "debian"
+    codename: "bullseye"
+    iso_file: "https://deb.debian.org/debian/dists/bullseye/main/installer-amd64/current/images/netboot/mini.iso"
