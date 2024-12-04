@@ -1,3 +1,8 @@
 dhcp-match=set:efi-x86_64,option:client-arch,7
 dhcp-match=set:efi-x86_64,option:client-arch,9
-dhcp-boot=tag:efi-x86_64,"efi64/grubnetx64.efi"
+
+dhcp-match=set:ipxe,175,19
+
+dhcp-boot=tag:efi-x86_64,ipxe/ipxe.efi
+
+dhcp-boot=tag:ipxe,tag:efi-x86_64,http://{{ pxeboot_server_ip }}/ipxe/boot.ipxe

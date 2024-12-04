@@ -3,7 +3,12 @@ server {
     server_name _;
 
     location /iso {
-        root /var/www;
+        alias /var/www/iso;
+        autoindex on;
+    }
+
+    location /ipxe {
+        alias /var/www/tftpboot/ipxe;
         autoindex on;
     }
 }

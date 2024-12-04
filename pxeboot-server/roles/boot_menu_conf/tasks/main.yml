@@ -1,5 +1,5 @@
 ---
-- name: Create bios and efi directory
+- name: Create bios and ipxe directory
   file:
     path: "{{ tftpboot_dir }}/{{ item }}"
     state: directory
@@ -7,10 +7,9 @@
     mode: '0755'
   loop:
     - "bios/pxelinux.cfg"
-    - "efi64"
-    - "grub/system"
+    - "ipxe"
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
 - name: Create symlink for bios/pxelinux.0
   file:
@@ -18,7 +17,7 @@
     dest: "{{ tftpboot_dir }}/bios/pxelinux.0"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
 - name: Create symlink for bios/ldlinux.c32
   file:
@@ -26,7 +25,7 @@
     dest: "{{ tftpboot_dir }}/bios/ldlinux.c32"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
 - name: Create symlink for bios/menu.c32
   file:
@@ -34,7 +33,7 @@
     dest: "{{ tftpboot_dir }}/bios/menu.c32"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
 - name: Create symlink for bios/libutil.c32
   file:
@@ -42,7 +41,7 @@
     dest: "{{ tftpboot_dir }}/bios/libutil.c32"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
 - name: Create symlink for bios/memdisk
   file:
@@ -50,12 +49,12 @@
     dest: "{{ tftpboot_dir }}/bios/memdisk"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf
 
-- name: Create symlink for efi64/grubnetx64.efi in TFTP directory
+- name: Create symlink for ipxe/ipxe.efi
   file:
-    src: /usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed
-    dest: "{{ tftpboot_dir }}/efi64/grubnetx64.efi"
+    src: "/usr/lib/ipxe/ipxe.efi"
+    dest: "{{ tftpboot_dir }}/ipxe/ipxe.efi"
     state: link
   tags:
-    - syslinux_conf
+    - boot_menu_conf

@@ -1,0 +1,7 @@
+---
+- name: Install ipxe
+  apt:
+    name: ipxe
+    state: present
+  tags:
+    - ipxe

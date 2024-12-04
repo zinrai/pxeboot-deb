@@ -1,6 +1,0 @@
-- name: Install grub-efi-amd64-signed
-  apt:
-    name: grub-efi-amd64-signed
-    state: present
-  tags:
-    - grub-efi-amd64-signed
