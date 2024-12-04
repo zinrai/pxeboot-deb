@@ -230,7 +230,19 @@ func mountAndCopyFiles(isoPath, tftpPath, mountPoint string, bootFiles BootFiles
 }
 
 func generatePXEMenus(config *Config) error {
-	pxelinuxCfgPath := filepath.Join(config.TFTPBootDir, "bios/pxelinux.cfg")
+	biosPath := filepath.Join(config.TFTPBootDir, "bios")
+	pxelinuxCfgPath := filepath.Join(biosPath, "pxelinux.cfg")
+
+	// Create symlink for images directory
+	imagesPath := filepath.Join(config.TFTPBootDir, "images")
+	osImagesPath := filepath.Join(biosPath, "images")
+
+	// Force create symlink
+	_ = os.Remove(osImagesPath)
+	if err := os.Symlink(imagesPath, osImagesPath); err != nil {
+		return fmt.Errorf("failed to create symlink: %v", err)
+	}
+	log.Printf("Created symlink from %s to %s", imagesPath, osImagesPath)
 
 	// Get current execution directory
 	execDir, err := os.Getwd()
