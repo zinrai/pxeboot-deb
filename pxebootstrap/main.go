@@ -211,11 +211,11 @@ func mountAndCopyFiles(isoPath, tftpPath, mountPoint string, bootFiles BootFiles
 	files := []struct{ src, dest string }{
 		{
 			src:  filepath.Join(mountPoint, bootFiles.Vmlinuz),
-			dest: filepath.Join(tftpPath, "vmlinuz"),
+			dest: filepath.Join(tftpPath, filepath.Base(bootFiles.Vmlinuz)),
 		},
 		{
 			src:  filepath.Join(mountPoint, bootFiles.Initrd),
-			dest: filepath.Join(tftpPath, "initrd"),
+			dest: filepath.Join(tftpPath, filepath.Base(bootFiles.Initrd)),
 		},
 	}
 

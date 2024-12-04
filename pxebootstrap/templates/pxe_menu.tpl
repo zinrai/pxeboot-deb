@@ -6,9 +6,9 @@ TIMEOUT 300
 {{- if .BootFiles.Vmlinuz }}
 label {{ .Name }}_{{ .Codename }}_image
     MENU LABEL ^Install {{ .Name }} {{ .Codename }} {{ .Version }} image
-    KERNEL /images/{{ .Name }}/{{ .Codename }}/{{ .Version }}/vmlinuz
+    KERNEL /images/{{ .Name }}/{{ .Codename }}/{{ .Version }}/{{ base .BootFiles.Vmlinuz }}
     IPAPPEND 2
-    APPEND initrd=/images/{{ .Name }}/{{ .Codename }}/{{ .Version }}/initrd ip=dhcp
+    APPEND initrd=/images/{{ .Name }}/{{ .Codename }}/{{ .Version }}/{{ base .BootFiles.Initrd }} ip=dhcp
 
 {{- else }}
 LABEL {{ .Name }}_{{ .Codename }}_iso
