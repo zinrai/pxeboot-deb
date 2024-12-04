@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"text/template"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,9 +28,19 @@ type Target struct {
 }
 
 type Config struct {
-	TFTPBootDir string   `yaml:"tftpboot_dir"`
-	ISODir      string   `yaml:"iso_dir"`
-	Targets     []Target `yaml:"targets"`
+	TFTPBootDir   string   `yaml:"tftpboot_dir"`
+	ISODir        string   `yaml:"iso_dir"`
+	PXEServerHost string   `yaml:"pxe_server_host"`
+	Targets       []Target `yaml:"targets"`
+}
+
+type MenuData struct {
+	PXEServerHost string
+	Targets       []Target
+}
+
+var templateFuncs = template.FuncMap{
+	"base": filepath.Base,
 }
 
 func main() {
@@ -80,6 +91,12 @@ func setupBootFiles(config *Config) error {
 			return fmt.Errorf("failed to process target %s: %v", target.Name, err)
 		}
 	}
+
+	// Generate PXE menus after processing all targets
+	if err := generatePXEMenus(config); err != nil {
+		return fmt.Errorf("failed to generate PXE menus: %v", err)
+	}
+
 	return nil
 }
 
@@ -89,13 +106,11 @@ func processTarget(config *Config, target Target) error {
 	tftpPath := filepath.Join(config.TFTPBootDir, "images", target.Name, target.Codename, target.Version)
 	mountPoint := filepath.Join("/mnt", target.Name, target.Codename, target.Version)
 
-	// Create directories
-	for _, dir := range []string{isoPath, tftpPath, mountPoint} {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			return fmt.Errorf("failed to create directory %s: %v", dir, err)
-		}
-		log.Printf("Created directory: %s", dir)
+	// Create ISO directory
+	if err := os.MkdirAll(isoPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %v", isoPath, err)
 	}
+	log.Printf("Created directory: %s", isoPath)
 
 	// Download ISO
 	isoFilePath := filepath.Join(isoPath, filepath.Base(target.ISOFile))
@@ -103,9 +118,22 @@ func processTarget(config *Config, target Target) error {
 		return err
 	}
 
-	// Mount ISO and copy files
-	if err := mountAndCopyFiles(isoFilePath, tftpPath, mountPoint, target.BootFiles); err != nil {
-		return err
+	// Mount and copy files only if boot_files is set
+	if target.BootFiles.Vmlinuz != "" && target.BootFiles.Initrd != "" {
+		// Create tftp and mount directories
+		for _, dir := range []string{tftpPath, mountPoint} {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				return fmt.Errorf("failed to create directory %s: %v", dir, err)
+			}
+			log.Printf("Created directory: %s", dir)
+		}
+
+		// Mount ISO and copy files
+		if err := mountAndCopyFiles(isoFilePath, tftpPath, mountPoint, target.BootFiles); err != nil {
+			return err
+		}
+	} else {
+		log.Printf("Skipping mount and copy for %s (boot_files not configured)", target.Name)
 	}
 
 	return nil
@@ -198,6 +226,49 @@ func mountAndCopyFiles(isoPath, tftpPath, mountPoint string, bootFiles BootFiles
 		}
 	}
 
+	return nil
+}
+
+func generatePXEMenus(config *Config) error {
+	pxelinuxCfgPath := filepath.Join(config.TFTPBootDir, "bios/pxelinux.cfg")
+
+	// Get current execution directory
+	execDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %v", err)
+	}
+
+	// Build absolute paths of template files
+	tplPath := filepath.Join(execDir, "templates", "pxe_menu.tpl")
+	log.Printf("Loading template from: %s", tplPath)
+
+	tplContent, err := os.ReadFile(tplPath)
+	if err != nil {
+		return fmt.Errorf("failed to read template file: %v", err)
+	}
+
+	tpl, err := template.New("pxe_menu").Funcs(templateFuncs).Parse(string(tplContent))
+	if err != nil {
+		return fmt.Errorf("failed to parse template: %v", err)
+	}
+
+	data := MenuData{
+		PXEServerHost: config.PXEServerHost,
+		Targets:       config.Targets,
+	}
+
+	defaultFile := filepath.Join(pxelinuxCfgPath, "default")
+	f, err := os.Create(defaultFile)
+	if err != nil {
+		return fmt.Errorf("failed to create default file: %v", err)
+	}
+	defer f.Close()
+
+	if err := tpl.Execute(f, data); err != nil {
+		return fmt.Errorf("failed to execute template: %v", err)
+	}
+
+	log.Printf("Generated PXE menu at: %s", defaultFile)
 	return nil
 }
 
