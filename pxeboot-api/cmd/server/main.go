@@ -13,13 +13,11 @@ import (
 )
 
 var templateFiles = struct {
-	PXELinux   string
-	GrubSystem string
-	Dnsmasq    string
+	PXELinux string
+	Dnsmasq  string
 }{
-	PXELinux:   "templates/pxelinux.tmpl",
-	GrubSystem: "templates/grub_system.tmpl",
-	Dnsmasq:    "templates/dnsmasq.tmpl",
+	PXELinux: "templates/pxelinux.tmpl",
+	Dnsmasq:  "templates/dnsmasq.tmpl",
 }
 
 func generateConfig(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +43,6 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 	// Generate a configuration file.
 	files := map[string]string{
 		"pxelinux_config": generatePXELinuxConfig(cfg, macForFilename),
-		"grub_config":     generateGrubSystemConfig(cfg, macForFilename),
 		"dnsmasq_config":  generateDnsmasqConfig(cfg, macForFilename),
 	}
 
@@ -69,8 +66,6 @@ func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig
 	switch templateType {
 	case "pxelinux_config":
 		templatePath = templateFiles.PXELinux
-	case "grub_config":
-		templatePath = templateFiles.GrubSystem
 	case "dnsmasq_config":
 		templatePath = templateFiles.Dnsmasq
 	default:
@@ -99,14 +94,6 @@ func generatePXELinuxConfig(cfg config.HostConfig, macForFilename string) string
 	return filepath.Join(
 		config.TFTPBootDir,
 		"pxelinux.cfg",
-		fmt.Sprintf("%s.conf", macForFilename),
-	)
-}
-
-func generateGrubSystemConfig(cfg config.HostConfig, macForFilename string) string {
-	return filepath.Join(
-		config.TFTPBootDir,
-		"grub/system",
 		fmt.Sprintf("%s.conf", macForFilename),
 	)
 }
