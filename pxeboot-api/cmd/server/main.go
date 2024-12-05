@@ -93,8 +93,8 @@ func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig
 func generatePXELinuxConfig(cfg config.HostConfig, macForFilename string) string {
 	return filepath.Join(
 		config.TFTPBootDir,
-		"pxelinux.cfg",
-		fmt.Sprintf("%s.conf", macForFilename),
+		"bios/pxelinux.cfg",
+		cfg.GetPXELinuxMACFormat(),
 	)
 }
 

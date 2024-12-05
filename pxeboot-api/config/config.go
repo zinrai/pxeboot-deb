@@ -35,10 +35,18 @@ func (c *HostConfig) CheckRequiredFiles() error {
 	return nil
 }
 
+// Return configuration file for dnsmasq in MAC address format
 func (c *HostConfig) GetMACForFilename() string {
 	return filepath.Join(
 		fmt.Sprintf("fixip-%s-%s",
 			c.Hostname,
 			strings.ReplaceAll(c.MACAddress, ":", "-")),
 	)
+}
+
+// Returns MAC address format for PXELinux boot configuration file name
+func (c *HostConfig) GetPXELinuxMACFormat() string {
+	// Replace colons in MAC addresses with hyphens
+	mac := strings.ToLower(strings.ReplaceAll(c.MACAddress, ":", "-"))
+	return fmt.Sprintf("01-%s", mac)
 }
