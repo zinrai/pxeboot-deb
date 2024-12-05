@@ -61,6 +61,49 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func listAvailableISOs(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var isoList []config.ISOInfo
+
+	err := filepath.Walk(config.ISODir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			relPath, err := filepath.Rel(config.ISODir, path)
+			if err != nil {
+				return err
+			}
+
+			parts := filepath.SplitList(filepath.Dir(relPath))
+			if len(parts) >= 2 {
+				isoList = append(isoList, config.ISOInfo{
+					Linux:    parts[0],
+					Codename: parts[1],
+					Filename: filepath.Base(path),
+				})
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading ISO directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"isos":   isoList,
+	})
+}
+
 func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig) error {
 	var templatePath string
 	switch templateType {
@@ -107,6 +150,7 @@ func generateDnsmasqConfig(cfg config.HostConfig, macForFilename string) string 
 
 func main() {
 	http.HandleFunc("/generate-config", generateConfig)
+	http.HandleFunc("/list-isos", listAvailableISOs)
 
 	log.Printf("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

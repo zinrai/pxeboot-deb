@@ -9,6 +9,7 @@ import (
 
 const (
 	TFTPBootDir = "/var/www/tftpboot"
+	ISODir      = "/var/www/iso/images"
 )
 
 type HostConfig struct {
@@ -18,6 +19,12 @@ type HostConfig struct {
 	Linux      string `json:"linux"`
 	Codename   string `json:"codename"`
 	Version    string `json:"version"`
+}
+
+type ISOInfo struct {
+	Linux    string `json:"linux"`
+	Codename string `json:"codename"`
+	Filename string `json:"filename"`
 }
 
 func (c *HostConfig) CheckRequiredFiles() error {
