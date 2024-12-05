@@ -224,9 +224,6 @@ func generateIPXEMenu(config *Config) error {
 	}
 
 	ipxePath := filepath.Join(config.TFTPBootDir, "ipxe")
-	if err := os.MkdirAll(ipxePath, 0755); err != nil {
-		return fmt.Errorf("failed to create ipxe directory: %v", err)
-	}
 
 	tplPath := filepath.Join(execDir, "templates", "ipxe_menu.tpl")
 	log.Printf("Loading iPXE template from: %s", tplPath)
