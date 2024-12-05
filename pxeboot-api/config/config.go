@@ -8,37 +8,31 @@ import (
 )
 
 const (
-	TFTPBootDir = "/var/www/tftpboot"
-	ISODir      = "/var/www/iso/images"
+	TFTPBootDir   = "/var/www/tftpboot"
+	ISODir        = "/var/www/iso/images"
+	PXEServerHost = "192.168.10.1"
 )
 
 type HostConfig struct {
 	MACAddress string `json:"mac_address"`
 	IPAddress  string `json:"ip_address"`
 	Hostname   string `json:"hostname"`
-	Linux      string `json:"linux"`
+	Name       string `json:"name"`
 	Codename   string `json:"codename"`
-	Version    string `json:"version"`
+	ISOFile    string `json:"iso"`
 }
 
 type ISOInfo struct {
-	Linux    string `json:"linux"`
+	Name     string `json:"name"`
 	Codename string `json:"codename"`
 	Filename string `json:"filename"`
 }
 
 func (c *HostConfig) CheckRequiredFiles() error {
-	files := []string{
-		filepath.Join(TFTPBootDir, "images", c.Linux, c.Codename, c.Version, "vmlinuz"),
-		filepath.Join(TFTPBootDir, "images", c.Linux, c.Codename, c.Version, "initrd"),
+	isoPath := filepath.Join(ISODir, c.Name, c.Codename, c.ISOFile)
+	if _, err := os.Stat(isoPath); os.IsNotExist(err) {
+		return fmt.Errorf("required file not found: %s", isoPath)
 	}
-
-	for _, file := range files {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			return fmt.Errorf("required file not found: %s", file)
-		}
-	}
-
 	return nil
 }
 
@@ -56,4 +50,17 @@ func (c *HostConfig) GetPXELinuxMACFormat() string {
 	// Replace colons in MAC addresses with hyphens
 	mac := strings.ToLower(strings.ReplaceAll(c.MACAddress, ":", "-"))
 	return fmt.Sprintf("01-%s", mac)
+}
+
+// Auxiliary data for templates
+func (c *HostConfig) GetTemplateData() map[string]interface{} {
+	return map[string]interface{}{
+		"Name":          c.Name,
+		"Codename":      c.Codename,
+		"ISOFile":       c.ISOFile,
+		"MACAddress":    c.MACAddress,
+		"IPAddress":     c.IPAddress,
+		"Hostname":      c.Hostname,
+		"PXEServerHost": PXEServerHost,
+	}
 }

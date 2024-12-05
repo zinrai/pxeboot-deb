@@ -83,7 +83,7 @@ func listAvailableISOs(w http.ResponseWriter, r *http.Request) {
 			parts := filepath.SplitList(filepath.Dir(relPath))
 			if len(parts) >= 2 {
 				isoList = append(isoList, config.ISOInfo{
-					Linux:    parts[0],
+					Name:     parts[0],
 					Codename: parts[1],
 					Filename: filepath.Base(path),
 				})
@@ -126,7 +126,7 @@ func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig
 	}
 	defer f.Close()
 
-	if err := tmpl.Execute(f, cfg); err != nil {
+	if err := tmpl.Execute(f, cfg.GetTemplateData()); err != nil {
 		return fmt.Errorf("failed to execute template: %v", err)
 	}
 

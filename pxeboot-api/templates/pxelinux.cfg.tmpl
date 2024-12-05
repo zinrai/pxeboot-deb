@@ -1,7 +1,8 @@
 default linux
 prompt 0
 timeout 30
-label linux
-kernel /images/{{.Linux}}/{{.Codename}}/{{.Version}}/vmlinuz
-ipappend 2
-append initrd=/images/{{.Linux}}/{{.Codename}}/{{.Version}}/initrd autoinstall ip=dhcp
+LABEL {{ .Name }}_{{ .Codename }}_iso
+    MENU LABEL ^Install {{ .Name }} {{ .Codename }}
+    KERNEL memdisk
+    INITRD http://{{ $.PXEServerHost }}/iso/images/{{ .Name }}/{{ .Codename }}/{{ .ISOFile }}
+    APPEND iso raw
