@@ -98,14 +98,17 @@ func listAvailableISOs(w http.ResponseWriter, r *http.Request) {
 				return err
 			}
 
-			parts := filepath.SplitList(filepath.Dir(relPath))
-			if len(parts) >= 2 {
+			dir := filepath.Dir(relPath)
+			name := filepath.Base(filepath.Dir(dir)) // ex: debian
+			codename := filepath.Base(dir)           // ex: bookworm
+
+			if name != "" && codename != "" {
 				isoList = append(isoList, config.ISOInfo{
-					Name:     parts[0],
-					Codename: parts[1],
+					Name:     name,
+					Codename: codename,
 					Filename: filepath.Base(path),
 				})
-				InfoLogger.Printf("Found ISO: %s/%s/%s", parts[0], parts[1], filepath.Base(path))
+				InfoLogger.Printf("Found ISO: %s/%s/%s", name, codename, filepath.Base(path))
 			}
 		}
 		return nil
