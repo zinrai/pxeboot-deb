@@ -139,7 +139,7 @@ func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig
 		return fmt.Errorf("unknown template type: %s", templateType)
 	}
 
-	tmpl, err := template.ParseFiles(templatePath)
+	tmpl, err := template.New(filepath.Base(templatePath)).ParseFiles(templatePath)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %v", err)
 	}
@@ -161,8 +161,8 @@ var templateFiles = struct {
 	PXELinux string
 	Dnsmasq  string
 }{
-	PXELinux: "templates/pxelinux.tmpl",
-	Dnsmasq:  "templates/dnsmasq.tmpl",
+	PXELinux: "templates/pxelinux.cfg.tmpl",
+	Dnsmasq:  "templates/dnsmasq.conf.tmpl",
 }
 
 func generatePXELinuxConfig(cfg config.HostConfig, macForFilename string) string {

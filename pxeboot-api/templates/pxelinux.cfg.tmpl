@@ -1,6 +1,6 @@
-default linux
-prompt 0
-timeout 30
+DEFAULT {{ .Name }}_{{ .Codename }}_iso
+PROMPT 0
+TIMEOUT 30
 LABEL {{ .Name }}_{{ .Codename }}_iso
     MENU LABEL ^Install {{ .Name }} {{ .Codename }}
     KERNEL memdisk
