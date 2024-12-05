@@ -1,10 +1,13 @@
 ---
-# Dnsmasq
-dnsmasq_interface: "ens8"
-router_ip: "{{ pxeboot_server_ip }}"
-netmask: "255.255.255.0"
-dns_server: "{{ pxeboot_server_ip }}"
-dhcp_range: "192.168.10.100,192.168.10.200,12h"
+dnsmasq:
+  interface: "ens8"
+  router_ip: "{{ pxeboot_server_ip }}"
+  netmask: "255.255.255.0"
+  dns_server: "{{ pxeboot_server_ip }}"
+  dhcp_range: "192.168.10.100,192.168.10.200,12h"
+
+nftables:
+  wan_interface: "ens3"
 
 pxeboot_server_ip: "192.168.10.1"
 

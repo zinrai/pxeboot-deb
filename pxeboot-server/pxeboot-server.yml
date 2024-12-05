@@ -4,3 +4,4 @@
     - nginx_conf
     - boot_menu_conf
     - dnsmasq_conf
+    - nftables_conf

@@ -1,0 +1,27 @@
+---
+- name: Enable IPv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-ip-forward.conf
+  tags:
+    - nftables_conf
+
+- name: Enable and start nftables service
+  systemd:
+    name: nftables
+    enabled: yes
+    state: started
+  tags:
+    - nftables_conf
+
+- name: Configure nftables for IP masquerade
+  template:
+    src: etc/nftables.conf.j2
+    dest: /etc/nftables.conf
+    mode: '0755'
+  notify: Restart nftables
+  tags:
+    - nftables_conf
