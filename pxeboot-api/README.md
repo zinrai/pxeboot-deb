@@ -1,4 +1,4 @@
-# PXE Boot Configuration API
+# PXE Boot Configuration HTTP API
 
 This HTTP API server automates OS installation by generating MAC address-specific PXE boot configurations. It enables network booting with customized settings for each machine, supporting both BIOS and iPXE boot environments. The server is specifically designed to streamline the process of deploying operating systems across multiple machines while maintaining individual configurations.
 
@@ -14,10 +14,7 @@ This HTTP API server automates OS installation by generating MAC address-specifi
 
 ## Prerequisites
 
-- System requirements:
-  - `/var/www/tftpboot` - TFTP root directory
-  - `/var/www/iso/images` - ISO files directory
-  - `/etc/dnsmasq.d` - dnsmasq configuration directory
+[pxeboot-server](../pxeboot-server)
 
 ## Directory Structure
 
