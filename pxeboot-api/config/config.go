@@ -39,8 +39,7 @@ func (c *HostConfig) CheckRequiredFiles() error {
 // Return configuration file for dnsmasq in MAC address format
 func (c *HostConfig) GetMACForFilename() string {
 	return filepath.Join(
-		fmt.Sprintf("fixip-%s-%s",
-			c.Hostname,
+		fmt.Sprintf("99-fixip-%s",
 			strings.ReplaceAll(c.MACAddress, ":", "-")),
 	)
 }
@@ -55,12 +54,13 @@ func (c *HostConfig) GetPXELinuxMACFormat() string {
 // Auxiliary data for templates
 func (c *HostConfig) GetTemplateData() map[string]interface{} {
 	return map[string]interface{}{
-		"Name":          c.Name,
-		"Codename":      c.Codename,
-		"ISOFile":       c.ISOFile,
-		"MACAddress":    c.MACAddress,
-		"IPAddress":     c.IPAddress,
-		"Hostname":      c.Hostname,
-		"PXEServerHost": PXEServerHost,
+		"Name":             c.Name,
+		"Codename":         c.Codename,
+		"ISOFile":          c.ISOFile,
+		"MACAddress":       c.MACAddress,
+		"IPAddress":        c.IPAddress,
+		"Hostname":         c.Hostname,
+		"PXEServerHost":    PXEServerHost,
+		"MACAddressFormat": c.GetPXELinuxMACFormat(),
 	}
 }

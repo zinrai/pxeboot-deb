@@ -17,6 +17,16 @@ var (
 	ErrorLogger *log.Logger
 )
 
+var templateFiles = struct {
+	PXELinux string
+	IPXE     string
+	Dnsmasq  string
+}{
+	PXELinux: "templates/pxelinux.cfg.tmpl",
+	IPXE:     "templates/ipxeboot.tmpl",
+	Dnsmasq:  "templates/dnsmasq.conf.tmpl",
+}
+
 func initLogger() {
 	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lmicroseconds)
 	ErrorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime|log.Lmicroseconds)
@@ -49,9 +59,10 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 
 	macForFilename := cfg.GetMACForFilename()
 
-	// Generate a configuration file.
+	// Generate configuration files for both BIOS and iPXE
 	files := map[string]string{
-		"pxelinux_config": generatePXELinuxConfig(cfg, macForFilename),
+		"pxelinux_config": generateBIOSConfig(cfg, macForFilename),
+		"ipxe_config":     generateIPXEConfig(cfg, macForFilename),
 		"dnsmasq_config":  generateDnsmasqConfig(cfg, macForFilename),
 	}
 
@@ -72,6 +83,56 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 		"message": "Configuration files generated successfully",
 		"files":   files,
 	})
+}
+
+func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig) error {
+	var templatePath string
+	switch templateType {
+	case "pxelinux_config":
+		templatePath = templateFiles.PXELinux
+	case "ipxe_config":
+		templatePath = templateFiles.IPXE
+	case "dnsmasq_config":
+		templatePath = templateFiles.Dnsmasq
+	default:
+		return fmt.Errorf("unknown template type: %s", templateType)
+	}
+
+	tmpl, err := template.New(filepath.Base(templatePath)).ParseFiles(templatePath)
+	if err != nil {
+		return fmt.Errorf("failed to parse template: %v", err)
+	}
+
+	f, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer f.Close()
+
+	return tmpl.Execute(f, cfg.GetTemplateData())
+}
+
+func generateBIOSConfig(cfg config.HostConfig, macForFilename string) string {
+	return filepath.Join(
+		config.TFTPBootDir,
+		"bios/pxelinux.cfg",
+		cfg.GetPXELinuxMACFormat(),
+	)
+}
+
+func generateIPXEConfig(cfg config.HostConfig, macForFilename string) string {
+	return filepath.Join(
+		config.TFTPBootDir,
+		"ipxe",
+		cfg.GetPXELinuxMACFormat(),
+	)
+}
+
+func generateDnsmasqConfig(cfg config.HostConfig, macForFilename string) string {
+	return filepath.Join(
+		"/etc/dnsmasq.d",
+		fmt.Sprintf("%s.conf", macForFilename),
+	)
 }
 
 func listAvailableISOs(w http.ResponseWriter, r *http.Request) {
@@ -126,58 +187,6 @@ func listAvailableISOs(w http.ResponseWriter, r *http.Request) {
 		"status": "success",
 		"isos":   isoList,
 	})
-}
-
-func generateFromTemplate(templateType, outputPath string, cfg config.HostConfig) error {
-	var templatePath string
-	switch templateType {
-	case "pxelinux_config":
-		templatePath = templateFiles.PXELinux
-	case "dnsmasq_config":
-		templatePath = templateFiles.Dnsmasq
-	default:
-		return fmt.Errorf("unknown template type: %s", templateType)
-	}
-
-	tmpl, err := template.New(filepath.Base(templatePath)).ParseFiles(templatePath)
-	if err != nil {
-		return fmt.Errorf("failed to parse template: %v", err)
-	}
-
-	f, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %v", err)
-	}
-	defer f.Close()
-
-	if err := tmpl.Execute(f, cfg.GetTemplateData()); err != nil {
-		return fmt.Errorf("failed to execute template: %v", err)
-	}
-
-	return nil
-}
-
-var templateFiles = struct {
-	PXELinux string
-	Dnsmasq  string
-}{
-	PXELinux: "templates/pxelinux.cfg.tmpl",
-	Dnsmasq:  "templates/dnsmasq.conf.tmpl",
-}
-
-func generatePXELinuxConfig(cfg config.HostConfig, macForFilename string) string {
-	return filepath.Join(
-		config.TFTPBootDir,
-		"bios/pxelinux.cfg",
-		cfg.GetPXELinuxMACFormat(),
-	)
-}
-
-func generateDnsmasqConfig(cfg config.HostConfig, macForFilename string) string {
-	return filepath.Join(
-		"/etc/dnsmasq.d",
-		fmt.Sprintf("%s.conf", macForFilename),
-	)
 }
 
 func main() {

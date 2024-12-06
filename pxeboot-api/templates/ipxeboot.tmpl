@@ -1,0 +1,24 @@
+#!ipxe
+
+menu PXE Boot Menu
+item --gap -- --------------------------------
+item {{ .Name }}_{{ .Codename }} Install {{ .Name }} {{ .Codename }}
+item shell iPXE Shell
+item exit  Exit to BIOS
+choose selected || goto shell
+
+:{{.Name}}_{{.Codename}}
+sanboot --no-describe --drive 0x81 http://{{ .PXEServerHost }}/iso/images/{{ .Name }}/{{ .Codename }}/{{ .ISOFile }} || goto failed
+goto start
+boot
+
+:shell
+shell
+
+:exit
+exit
+
+:failed
+echo Boot failed
+prompt Press any key to continue
+goto start

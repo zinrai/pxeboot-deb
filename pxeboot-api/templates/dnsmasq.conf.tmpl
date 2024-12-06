@@ -1,1 +1,5 @@
-dhcp-host={{.MACAddress}},{{.IPAddress}},{{.Hostname}}
+# BIOS
+dhcp-host={{ .MACAddress }},{{ .IPAddress }},{{ .Hostname }},set:{{ .Hostname }}
+
+# iPXE
+dhcp-boot=tag:ipxe,tag:efi-x86_64,tag:{{ .Hostname }},http://{{ .PXEServerHost }}/ipxe/{{ .MACAddressFormat }}
