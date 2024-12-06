@@ -4,5 +4,5 @@ TIMEOUT 30
 LABEL {{ .Name }}_{{ .Codename }}_iso
     MENU LABEL ^Install {{ .Name }} {{ .Codename }}
     KERNEL memdisk
-    INITRD http://{{ $.PXEServerHost }}/iso/images/{{ .Name }}/{{ .Codename }}/{{ .ISOFile }}
+    INITRD http://{{ .PXEServerHost }}/iso/images/{{ .Name }}/{{ .Codename }}/{{ .ISOFile }}
     APPEND iso raw

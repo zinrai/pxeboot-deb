@@ -48,11 +48,11 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	InfoLogger.Printf("Processing configuration for host: %s (MAC: %s)", cfg.Hostname, cfg.MACAddress)
+	InfoLogger.Printf("Processing configuration for MAC: %s", cfg.MACAddress)
 
 	// Verify the existence of the necessary files.
 	if err := cfg.CheckRequiredFiles(); err != nil {
-		ErrorLogger.Printf("Required file check failed for host %s: %v", cfg.Hostname, err)
+		ErrorLogger.Printf("Required file check failed for MAC %s: %v", cfg.MACAddress, err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -69,14 +69,14 @@ func generateConfig(w http.ResponseWriter, r *http.Request) {
 	for configType, filePath := range files {
 		InfoLogger.Printf("Generating %s at %s", configType, filePath)
 		if err := generateFromTemplate(configType, filePath, cfg); err != nil {
-			ErrorLogger.Printf("Failed to generate %s for host %s: %v", configType, cfg.Hostname, err)
+			ErrorLogger.Printf("Failed to generate %s for MAC %s: %v", configType, cfg.MACAddress, err)
 			http.Error(w, fmt.Sprintf("Error generating %s: %v", configType, err), http.StatusInternalServerError)
 			return
 		}
 		InfoLogger.Printf("Successfully generated %s", configType)
 	}
 
-	InfoLogger.Printf("Configuration generated successfully for host: %s", cfg.Hostname)
+	InfoLogger.Printf("Configuration generated successfully for MAC: %s", cfg.MACAddress)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status":  "success",

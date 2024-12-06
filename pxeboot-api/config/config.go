@@ -15,8 +15,6 @@ const (
 
 type HostConfig struct {
 	MACAddress string `json:"mac_address"`
-	IPAddress  string `json:"ip_address"`
-	Hostname   string `json:"hostname"`
 	Name       string `json:"name"`
 	Codename   string `json:"codename"`
 	ISOFile    string `json:"iso"`
@@ -58,8 +56,6 @@ func (c *HostConfig) GetTemplateData() map[string]interface{} {
 		"Codename":         c.Codename,
 		"ISOFile":          c.ISOFile,
 		"MACAddress":       c.MACAddress,
-		"IPAddress":        c.IPAddress,
-		"Hostname":         c.Hostname,
 		"PXEServerHost":    PXEServerHost,
 		"MACAddressFormat": c.GetPXELinuxMACFormat(),
 	}
